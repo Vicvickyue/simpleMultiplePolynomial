@@ -1,0 +1,72 @@
+---
+title: "Lab01"
+author: "Vicky Yue"
+date: "9/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**The Goal**
+Given a data set containing characteristics about the Boston housing market, explore methods for predicting housing prices.
+
+You'll need to clone this repository using RStudio first. 
+Practice writing and adding code that produces a simple linear regression, multiple linear regression, and polynomial regression.
+Include a visual and quantitative method for assessing whether some models may better explain housing prices than other models.
+
+We will discuss some models students have proposed and ways to communicate these models to a lay audience.
+
+### Data
+The dataset and the data dictionary are included in the folder called data.
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+boston_data <- read.csv("./data/boston_data_updated.csv")
+```
+
+```{r}
+
+#We use simple linear regression to explore the relationship between MEDV, the dependent variable, and CHAS, the independent variable.
+SLRMod = lm(MEDV ~ AGE, data = boston_data)
+ggplot(data = boston_data,
+mapping = aes(x = AGE, y = MEDV),
+) +
+geom_point()+geom_smooth(method = lm)
+summary(SLRMod)
+```
+From the summary of the model, the p-value is far less than 0.05, which means there is a relationship between median value of owner-occupied homes and the proportion of owner-occupied units built prior to 1940. From the fitted line, we can also tell there is positive relationship between boston house price and the house's age. This model explain housing prices well. 
+
+```{r}
+#We use multiple linear regression model to explore the whether there exist effect of CRIM, ZN, NOX, TAX to MEDV
+MLRMod = lm(MEDV ~ CRIM+ZN+NOX+TAX, data = boston_data)
+ggplot(data = boston_data,
+mapping = aes(x = CRIM+ZN+NOX+TAX, y = MEDV),
+) +
+geom_point()+geom_smooth(method = lm)
+summary(MLRMod)
+
+```
+From the output of the model, we can see that p-value indicates a relationship between the the four independent variables and MEDV. However, The coefficient p-values of NOX is 0.136952 > 0.05, which means it is not statistically significant. We may consider removing NOX since keeping variable that are not statisticlaly significant can reduce the model's precision even if the p value is smaller than 0.05 as a whole. Also, from the plot, we can see the huge gap between around 450 and 680 on the x axis, which means the fitted line cannot be used as prediction for the model. This model doesn't do well explaining the data.
+
+
+
+```{r}
+#We use polynomial regression to see the relationship between MEDV and CRIM
+PRMod <- lm(MEDV ~ AGE + I(AGE^2), data = boston_data)
+plot(MEDV ~ AGE, data = boston_data)
+lines(boston_data$AGE, fitted(PRMod), col = 'red')
+summary(PRMod)
+anova(PRMod)
+```
+From the graph, we can see that the curve captures the pattern of the data better than the fitted line from the linear regression model, which also correspond to a higher r-squared in polynomial regression.
+
+### Questions
+* How would you explain SSE?
+Statistically, it is the sum of squared differences between each observation and the group mean. The smaller SSE is, the tighter and better fit the model is to the data. 
+* How would you explain your model?
+Said it Above
+
+
